@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'login$', views.UserLoginAPIView.as_view(), name='user_login'),
     url(r'mail/send$', views.SenderMailCodeAPIView.as_view(), name='sender_mail'),
     url(r'register$', views.RegisterUserAPIView.as_view(), name='register_user'),
+    url(r'forget-password$', views.ForgetPasswordAPIView.as_view(), name='register_user'),
 ]
 
 

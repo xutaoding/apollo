@@ -29,7 +29,7 @@ class BaseAPIView(object):
     #         msg = 'Permission error: {}, Msg: require administrator to handle!'
     #         raise NotAuthenticated(msg.format(str(exc)))
 
-    def value_from_request(self, key, request=None, to_join=False, delimiter=''):
+    def value_from_request(self, key, default=None, request=None, to_join=False, delimiter=''):
         """ 获取 request POST 方法的data数据:
             self.request is request (self.request == request) and
             self.request.data is request.data (self.request.data == request.data) and
@@ -43,7 +43,10 @@ class BaseAPIView(object):
         request = request or self.request
         data = dict(request.data)
 
-        return data[key] if not to_join else delimiter.join(data[key])
+        if not to_join:
+            return delimiter.join(data.get(key, default))
+
+        return data.get(key, default)
 
     def get_or_create_once(self, *args, **kwargs):
         for_write = kwargs.pop('for_write', {})
