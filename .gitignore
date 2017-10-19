@@ -1,0 +1,4 @@
+.idea/
+static/controller
+*.pyc
+/lib/crypto.py
