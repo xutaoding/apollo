@@ -102,7 +102,7 @@ DATABASES = {
         'NAME': 'apollo_00',
         'USER': 'root',
         'PASSWORD': 'root',
-        'HOST': '192.168.216.167',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
 
         'OPTIONS': {
@@ -118,17 +118,18 @@ DATABASES = {
 }
 
 # Start Configure `DATABASE_ROUTERS` settings
-# # 暂时先不分库分表，多机器分库时，产生如下错误：
-# # owner = models.ForeignKey('auth.User', null=True, blank=True,
-# #                          related_name='owners', on_delete=models.SET_NULL)
-# # django.db.utils.IntegrityError: (1215, 'Cannot add foreign key constraint')
-# # Guess: ForeignKey 无法支持多机器分库
-
-# DATABASE_ROUTERS = ['apollo.database_router.DatabaseAppsRouter']
-# DATABASE_APPS_MAPPING = {
-#     'django_celery_results': 'apollo',
-#     'accounts': 'apollo',
-# }
+# 暂时先不分库分表，多机器分库时，产生如下错误：
+# owner = models.ForeignKey('auth.User', null=True, blank=True,
+#                          related_name='owners', on_delete=models.SET_NULL)
+# django.db.utils.IntegrityError: (1215, 'Cannot add foreign key constraint')
+# Guess: ForeignKey 无法支持多机器分库
+#
+DATABASE_ROUTERS = ['apollo.database_router.DatabaseAppsRouter']
+DATABASE_APPS_MAPPING = {
+    'django_celery_results': 'apollo',
+    'accounts': 'apollo',
+    'aegis': 'apollo'
+}
 # End Configure `DATABASE_ROUTERS` settings
 
 # Password validation

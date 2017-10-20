@@ -11,19 +11,29 @@ from lib.utils import gen_md5, download_html
 
 
 # Create your views here.
-class FileAPIView(BaseAPIView, generics.CreateAPIView):
+class IsPaymentUser(BaseAPIView, generics.RetrieveAPIView):
+    model_class = None
+    queryset = None
+    serializer_class = None
+
+
+
+class DownloaderAPIView(BaseAPIView, generics.CreateAPIView):
     model_class = AegisFileModel
     queryset = model_class.objects.all()
     serializer_class = HtmlFileModelSerializer
 
     def post(self, request, *args, **kwargs):
-        print request
-        url = self.value_from_request(key='url', to_join=True)
+        decrypted_data = self.decrypt_from_request(request)
+        if decrypted_data:
+            return decrypted_data
+
+        url = self.value_from_request(key='url', request=request)
+        name = self.value_from_request(key='url', request=request)
+        desc = self.value_from_request(key='description', request=request)
         download_html(url)
 
-        request.data._mutable = True
         request.data['fn_md5'] = gen_md5(url)
-        request.data._mutable = False
 
         return self.create(request, *args, **kwargs)
 

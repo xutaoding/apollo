@@ -61,5 +61,5 @@ class DefinedSenderMail(object):
 
 
 if __name__ == "__main__":
-    print get_mail_verify_code()
+    pass
 

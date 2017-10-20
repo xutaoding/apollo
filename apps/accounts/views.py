@@ -63,9 +63,19 @@ class UserRegisterDeprecatedView(BaseAPIView, generics.CreateAPIView):
 
 
 class UserLoginAPIView(BaseAPIView, ObtainJSONWebToken):
+    model_class = User
+
     def post(self, request, *args, **kwargs):
         result = self.decrypt_from_request(request=request)
         if result: return result
+
+        username = self.value_from_request(key='username', request=request)
+        try:
+            user = self.model_class.objects.get(username=username)
+            user.last_login = timezone.now()
+            user.save()
+        except self.model_class.DoesNotExist:
+            pass
 
         return super(ObtainJSONWebToken, self).post(request, *args, **kwargs)
 

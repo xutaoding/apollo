@@ -10,7 +10,7 @@ from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 import views
 
 urlpatterns = [
-    url(r'file/create', views.FileAPIView.as_view(), name='aegis_file'),
+    url(r'downloader$', views.DownloaderAPIView.as_view(), name='aegis_file'),
     # url(r'user/register', views.RegisterUserAPIView.as_view(), name='register_user'),
 ]
 
