@@ -28,7 +28,7 @@ DATABASES.update({
         'NAME': 'apollo_00',
         'USER': 'root',
         'PASSWORD': 'root',
-        'HOST': '192.168.216.172',
+        'HOST': '127.0.0.1',
         'PORT': '3306'
     },
 })

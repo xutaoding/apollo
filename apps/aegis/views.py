@@ -4,7 +4,10 @@ from __future__ import unicode_literals
 from rest_framework import generics
 
 from ..base_view import BaseAPIView
-from .models import AegisFileModel
+from .models import (
+    MiddleFileModel,
+    WalletModel,
+)
 from .serializers import HtmlFileModelSerializer
 
 from lib.utils import gen_md5, download_html
@@ -12,14 +15,17 @@ from lib.utils import gen_md5, download_html
 
 # Create your views here.
 class IsPaymentUser(BaseAPIView, generics.RetrieveAPIView):
-    model_class = None
-    queryset = None
-    serializer_class = None
+    model_class = WalletModel
+    queryset = model_class.objects.all()
+    # serializer_class = None
 
+    def get(self, request, *args, **kwargs):
+        wallet = self.get_or_none(username=request.user.username)
+        return bool(wallet)
 
 
 class DownloaderAPIView(BaseAPIView, generics.CreateAPIView):
-    model_class = AegisFileModel
+    model_class = MiddleFileModel
     queryset = model_class.objects.all()
     serializer_class = HtmlFileModelSerializer
 

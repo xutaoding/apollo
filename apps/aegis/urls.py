@@ -11,7 +11,7 @@ import views
 
 urlpatterns = [
     url(r'downloader$', views.DownloaderAPIView.as_view(), name='aegis_file'),
-    # url(r'user/register', views.RegisterUserAPIView.as_view(), name='register_user'),
+    url(r'payment$', views.IsPaymentUser.as_view(), name='aegis_payment'),
 ]
 
 

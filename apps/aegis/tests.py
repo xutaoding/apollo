@@ -6,12 +6,14 @@ import requests
 
 
 # Create your tests here.
+# url = 'http://127.0.0.1:8000/api/aegis/html_file/create'
 url = 'http://127.0.0.1:8000/api/aegis/html_file/create'
-t_url = 'http://127.0.0.1:8000/api-auth/token/obtain'
+t_url = 'http://192.168.216.172:8000/api/aegis/payment$'
 # t_r = requests.post(t_url, data={'username': 'admin', 'password': 'admin123'})
 # token = t_r.json()['token']
 # cookie = t_r.cookies['drf-jwt-apollo']
 # print token
 # print cookie
 
-print requests.post(url, data={'username': 'admin', 'url': 'http://www.bbb.com/aaa.html'}).content
+# print requests.post(url, data={'username': 'admin', 'url': 'http://www.bbb.com/aaa.html'}).content
+print requests.get(url).content

@@ -48,6 +48,17 @@ class BaseAPIView(object):
 
         return data.get(key, default)
 
+    def get_or_none(self, *args, **kwargs):
+        obj = None
+        model_class = kwargs.pop('model_class', None) or self.model_class
+
+        try:
+            obj = model_class.objects.get(*args, **kwargs)
+        except model_class.DoesNotExist:
+            pass
+
+        return obj
+
     def get_or_create_once(self, *args, **kwargs):
         for_write = kwargs.pop('for_write', {})
         model_class = kwargs.pop('model_class', None) or self.model_class
