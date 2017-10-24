@@ -199,8 +199,8 @@ REST_FRAMEWORK = {
 
 # `rest_framework_jwt` settings start
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=300),  # expired time
-    'JWT_AUTH_HEADER_PREFIX': 'JWT-ABC',  # request header prefix
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=600),  # expired time
+    'JWT_AUTH_HEADER_PREFIX': 'JWT-MSC',  # request header prefix
     'JWT_AUTH_COOKIE': 'drf-apo',
 
     'JWT_ALLOW_REFRESH': True,
