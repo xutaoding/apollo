@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import uuid
 from copy import deepcopy
 
 from django.core.exceptions import FieldError
@@ -72,6 +73,8 @@ class BaseAPIView(object):
 
     def decrypt_from_request(self, request=None):
         request = request or self.request
+        print request.data
+        print request.data['en_token']
         encrypt_msg = request.data.pop('en_token')
 
         try:
@@ -83,6 +86,10 @@ class BaseAPIView(object):
 
         for key, value in data.iteritems():
             request.data[key] = value
+
+    @property
+    def uuid(self):
+        return str(uuid.uuid4()).replace('-', '')
 
     def get_user_data_from_aegis(self):
         assert 'email' in self.request.data, "`email` required"
