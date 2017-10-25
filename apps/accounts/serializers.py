@@ -7,7 +7,7 @@ from models import MailVerifyCode
 class MailVerifyCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = MailVerifyCode
-        fields = ['verify_code', 'owner_name']
+        fields = ['email', 'verify_code', 'owner_name']
 
 
 class UserSerializer(serializers.ModelSerializer):

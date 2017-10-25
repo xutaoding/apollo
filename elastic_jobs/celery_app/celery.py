@@ -6,7 +6,7 @@ from celery import Celery
 from . import settings
 
 # Must set django configuration to env
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "apollo.settings.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "apollo.settings.dev")
 
 
 def get_tasks_packages():

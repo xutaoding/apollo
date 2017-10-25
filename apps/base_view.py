@@ -91,14 +91,18 @@ class BaseAPIView(object):
     def uuid(self):
         return str(uuid.uuid4()).replace('-', '')
 
-    def get_user_data_from_aegis(self):
-        assert 'email' in self.request.data, "`email` required"
-        assert 'username' in self.request.data, "`username` required"
+    def get_user_data(self, request=None):
+        request = request or self.request
 
-        data = deepcopy(self.request.data)
-        required_user_fields = ['username', 'email', 'is_staff', 'is_active']
+        assert 'email' in request.data, "`email` required"
+        assert 'username' in request.data, "`username` required"
 
-        return {field: data.get(field, False) for field in required_user_fields}
+        data = deepcopy(request.data)
+        user_fields = ['username', 'password', 'email', 'is_superuser']
+        user_data = {field: data.get(field, False) for field in user_fields}
+        user_data.update(is_staff=True, is_active=True)
+
+        return user_data
 
     @property
     def default_response(self):

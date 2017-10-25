@@ -54,6 +54,11 @@
 &#160;&#160;&#160;&#160;&#160;&#160;&#160;`RuntimeError: maximum recursion depth exceeded while calling a Python object`  
 
 &#160;&#160;方案：将`elastic_jobs/celery_app/celery.py` 文件与`settings.py`(即: `elastic_jobs/celery_app/settings.py`)文件放在一起  
-&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;`elastic_jobs/celery_app/celery.py`文件内容参考工程
+&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;`elastic_jobs/celery_app/celery.py`文件内容参考工程  
+
+(3)：`celery.py` 加载django配置问题:  
+ &#160;&#160;`os.environ.setdefault("DJANGO_SETTINGS_MODULE", "apollo.settings.dev")`： 
+
+
 
 

@@ -87,7 +87,7 @@ class SenderMailCodeAPIView(BaseAPIView, generics.GenericAPIView):
 
     permission_classes = ()
 
-    def send_mail_and_save(self, username, verify_code, recipient_list):
+    def send_mail_and_save(self, username, email, verify_code, recipient_list):
         data = self.default_response
         subject = u'宙斯盾-用户注册校验码邮件'
         message = u'Hi {},\n\t您的注册确认码为: {}\n\t' \
@@ -98,11 +98,13 @@ class SenderMailCodeAPIView(BaseAPIView, generics.GenericAPIView):
             data.update(message=u'邮箱验证码10分钟内均有效')
             return Response(data=data, status=status.HTTP_201_CREATED)
 
-        send_mail_by_celery.delay(subject, message.format(username, verify_code), recipient_list)
-
-        s = self.serializer_class(data={'verify_code': verify_code, 'owner_name': username})
+        s = self.serializer_class(data={
+            'email': email, 'owner_name': username,
+            'verify_code': verify_code
+        })
         if s.is_valid():
             s.save()
+            send_mail_by_celery.delay(subject, message.format(username, verify_code), recipient_list)
             data.update(isSuccess=True, message='验证码已发送到你的邮箱')
             return Response(data=data, status=status.HTTP_201_CREATED)
 
@@ -113,6 +115,7 @@ class SenderMailCodeAPIView(BaseAPIView, generics.GenericAPIView):
 
         # Decrypt data from request
         username = self.value_from_request(key='username', request=request)
+        email = self.value_from_request(key='email', request=request)
         recipient = self.value_from_request(key='email', request=request)
         recipient_list = list(recipient) if isinstance(recipient, (list, tuple)) else [recipient]
 
@@ -125,10 +128,9 @@ class SenderMailCodeAPIView(BaseAPIView, generics.GenericAPIView):
             data.update(message=u'该邮箱已被注册')
             return Response(data=data, status=status.HTTP_201_CREATED)
 
-        User.objects.create(**self.get_user_data_from_aegis())
+        # User.objects.create(**self.get_user_data_from_aegis())
         verify_code = get_validation_code()
-
-        return self.send_mail_and_save(username, verify_code, recipient_list)
+        return self.send_mail_and_save(username, email, verify_code, recipient_list)
 
     def send_by_forgetter(self, request):
         data = self.default_response
@@ -137,11 +139,12 @@ class SenderMailCodeAPIView(BaseAPIView, generics.GenericAPIView):
 
         try:
             user = User.objects.get(username=username)
+            email = user.email
         except User.DoesNotExist:
             data.update(message=u'用户名不正确')
             return Response(data=data, status=status.HTTP_202_ACCEPTED)
 
-        return self.send_mail_and_save(username, verify_code, [user.email])
+        return self.send_mail_and_save(username, email, verify_code, [user.email])
 
     def post(self, request, *args, **kwargs):
         """ Sending mail should administrator permission """
@@ -158,22 +161,20 @@ class SenderMailCodeAPIView(BaseAPIView, generics.GenericAPIView):
 
 
 class RegisterUserAPIView(BaseAPIView, generics.CreateAPIView):
-    model_class = MailVerifyCode
+    model_class = User
     serializer_class = UserSerializer
-    queryset = User.objects.all()
+    queryset = model_class.objects.all()
     permission_classes = (IsOwnerOrReadOnly, )
 
     def post(self, request, *args, **kwargs):
         data = self.default_response
         result = self.decrypt_from_request(request)
-        if result: return result
-
-        print request.data
+        if result is not None:
+            return result
 
         username = self.value_from_request(key='username', request=request)
-        password = self.value_from_request(key='password', request=request)
         verify_code = self.value_from_request(key='verify_code', request=request)
-        mvc = self.model_class.objects.filter(owner_name=username).first()
+        mvc = MailVerifyCode.objects.filter(owner_name=username).first()
 
         if mvc is None:
             data['message'] = u'请发送邮箱验证码'
@@ -183,18 +184,25 @@ class RegisterUserAPIView(BaseAPIView, generics.CreateAPIView):
             data['message'] = u'您的邮箱验证码已过期'
             return Response(data=data, status=status.HTTP_200_OK)
 
+        if mvc.email != self.value_from_request(key='email', request=request):
+            data['message'] = u'注册邮箱错误'
+            return Response(data=data, status=status.HTTP_200_OK)
+
         if mvc.verify_code != verify_code:
             data['message'] = u'邮箱验证码错误'
             return Response(data=data, status=status.HTTP_200_OK)
 
-        user = User.objects.get(username=username)
-        user.is_staff = True
-        user.is_active = True
-        user.set_password(password)
-        user.save()
+        s = self.serializer_class(data=self.get_user_data(request))
+        if s.is_valid():
+            s.save()
+            data.update(isSuccess=True, message=u'用户 {} 注册成功'.format(username))
 
-        data.update(isSuccess=True, message='OK')
-        return Response(data=data, status=status.HTTP_200_OK)
+            user = self.model_class.objects.get(username=username)
+            user.set_password(self.value_from_request(key='password', request=request))
+            user.save()
+            return Response(data=data, status=status.HTTP_200_OK)
+
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
 
 class ForgetPasswordAPIView(BaseAPIView, generics.CreateAPIView):

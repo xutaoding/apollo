@@ -200,6 +200,8 @@ REST_FRAMEWORK = {
 # `rest_framework_jwt` settings start
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=600),  # expired time
+
+    # 每次请求过来时如何验证用户(`rest_framework` or `rest_framework_jwt` 找到源代码)
     'JWT_AUTH_HEADER_PREFIX': 'JWT-MSC',  # request header prefix
     'JWT_AUTH_COOKIE': 'drf-apo',
 
