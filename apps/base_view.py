@@ -2,6 +2,7 @@
 
 import json
 import uuid
+import types
 from copy import deepcopy
 
 from django.core.exceptions import FieldError
@@ -42,9 +43,10 @@ class BaseAPIView(object):
         """
 
         request = request or self.request
-        data = dict(request.data)
+        data = dict(request.data or request.GET)
+        variable_types = (types.ListType, types.TupleType)
 
-        if not to_join:
+        if not to_join and isinstance(data.get(key, default), variable_types):
             return delimiter.join(data.get(key, default))
 
         return data.get(key, default)
@@ -90,6 +92,10 @@ class BaseAPIView(object):
     @property
     def uuid(self):
         return str(uuid.uuid4()).replace('-', '')
+
+    @property
+    def status_ok(self):
+        return [getattr(status, attr) for attr in dir(status) if attr.startswith('HTTP_20')]
 
     def get_user_data(self, request=None):
         request = request or self.request
