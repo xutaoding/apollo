@@ -21,5 +21,9 @@ python-scrapyd-api==2.0.1
 
 chardet>=3.0.4
 
+scrapy>=1.4.0
+python-scrapyd-api>=2.0.1
+
+#peewee>=2.10.1  # win install will remove pip
 # django-allauth >= 0.32.0
 # python-Levenshtein==0.12.0
