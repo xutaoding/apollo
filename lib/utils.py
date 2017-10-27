@@ -2,12 +2,10 @@
 
 import six
 import hashlib
-import urllib2
+
 import subprocess
 from os.path import abspath, dirname
 from os.path import join as join_path
-
-import chardet
 
 
 def gen_md5(s):
@@ -53,40 +51,4 @@ def execute_cmd_to_file(command, stdout=None, stderr=None, path=None):
     finally:
         fd_out.close()
         fd_err.close()
-
-
-def download_html(url, data=None, method='GET', headers=None):
-    default_headers = {
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, sdch, br',
-        'Accept-Language': 'zh-CN,zh;q=0.8',
-        'Connection': 'keep-alive',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                      'Chrome/61.0.3163.100 Safari/537.36'
-    }
-
-    headers = headers or {}
-    headers.update(default_headers)
-
-    if method == 'GET':
-        req = urllib2.Request(url, headers=headers)
-    elif method == 'POST':
-        req = urllib2.Request(url, data=data, headers=headers)
-    else:
-        raise
-
-    try:
-        response = urllib2.urlopen(req, timeout=30.0)
-        html = response.read()
-        response.close()
-
-        charset = chardet.detect(html)['encoding']
-        if charset is None:
-            return html
-        if charset != 'utf-8' and charset == 'GB2312':
-            charset = 'gb18030'
-
-        return html.decode(charset).encode('utf-8')
-    except Exception as exe:
-        return str(exe)
 
