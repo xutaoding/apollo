@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from rest_framework import mixins
+from django.conf import settings
 from rest_framework import generics
+from rest_framework import mixins
+from rest_framework import status
 from rest_framework.response import Response
 
-from ..base_view import BaseAPIView
+from lib.decorator import decrypt_request
+from lib.utils import gen_md5
 from .models import (
     MiddleFileModel, WalletModel,
     SpiderTasksModel,
 )
 from .serializers import (
     MiddleFileSerializer, WalletSerializer,
+    SpiderTaskSerializer
 )
-
-from lib.utils import gen_md5, download_html
-from lib.decorator import decrypt_request
+from ..base_view import BaseAPIView
 
 
 # Create your views here.
@@ -41,6 +43,7 @@ class UploadAPIView(BaseAPIView, generics.ListCreateAPIView):
     serializer_class = MiddleFileSerializer
 
     def post(self, request, *args, **kwargs):
+        """ 上传(参数)文件 """
         decrypted_data = self.decrypt_from_request(request)
         if decrypted_data:
             return decrypted_data
@@ -60,24 +63,47 @@ class SpiderTasksAPIView(BaseAPIView,
                          generics.ListCreateAPIView):
     model_class = SpiderTasksModel
     queryset = model_class.objects.all()
-    serializer_class = None
+    serializer_class = SpiderTaskSerializer
+
+    file_model_class = MiddleFileModel
+    file_serializer_class = MiddleFileSerializer
+
+    def create_file_record(self, request=None):
+        """ 多用户同时爬虫时下载网页需要Celery """
+        request = request or self.request
+        fields = [field.name for field in self.file_model_class._meta.fields
+                  if field.name not in ['crt', 'id']]
+
+        data = {key: request.data[key] for key in fields if request.data.get(key)}
+        data.update(filename=gen_md5(data['url']))
+
+        s = self.file_serializer_class(data=data)
+        if s.is_valid():
+            s.save()
+
+            save_path = settings.FILE_PATH + s.data['filename'] + s.data['ext']
+            download_request.delay(s.data['url'], save_path)
+
+            return Response(data=s.data, status=status.HTTP_201_CREATED)
+
+        return Response(data={'message': u'该网址的爬虫已存在'}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    @decrypt_request
+    def get(self, request, *args, **kwargs):
+        pass
 
     @decrypt_request
     def post(self, request, *args, **kwargs):
-        spider_task_id = self.uuid
-        url = request.data.pop('url')
-        ext = request.data.pop('ext')
-        file_data = dict(
-            url=url, ext=ext, filename=gen_md5(url),
-            spider_task_id=spider_task_id, username=request.data['username'],
-        )
+        """ 创建爬虫时下载网页(celery) """
 
-        if ext is not None:
-            file_data.update(file_utility='PM')
+        assert kwargs.pop('action', None) == 'create', ' Request post method to create spider task'
 
-        print 'request after:'
-        print request.data
-        print type(request.data)
+        request.data['spider_task_id'] = self.uuid
+        response = self.create_file_record(request)
+        if response.status_code not in self.status_ok:
+            return response
+
+        return self.create(request, *args, **kwargs)
 
     @decrypt_request
     def put(self, request, *args, **kwargs):

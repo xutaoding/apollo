@@ -32,23 +32,23 @@ class BaseDocument(DynamicDocument):
 
 class SpiderTasksModel(BaseSQLModel):
     spider_name = models.CharField(max_length=126)
-    spider_task_id = models.UUIDField()
+    spider_task_id = models.UUIDField(unique=True)
     spider_description = models.CharField(max_length=1024)
 
     # Scrapy Basic Configure
-    scy_robotstxt_obey = models.BooleanField(default=True)
-    scy_cookies_enabled = models.BooleanField(default=True)
-    scy_download_delay = models.DecimalField(default=0.0, decimal_places=2, max_digits=5)
-    scy_concurrent_requests = models.IntegerField(default=16)
-    scy_other_configure = models.TextField(default='{}')
+    robotstxt_obey = models.BooleanField(default=True)
+    cookies_enabled = models.BooleanField(default=True)
+    download_delay = models.DecimalField(default=1.0, decimal_places=2, max_digits=5)
+    concurrent_requests = models.IntegerField(default=16)
+    other_configure = models.TextField(default='{}')
 
     request_method = models.CharField(max_length=8, default='GET')
-    request_cookies = models.TextField()
-    request_headers = models.TextField()
+    request_cookies = models.TextField(default='')
+    request_headers = models.TextField(default='{}')
 
     proxy_ip_enabled = models.BooleanField(default=False)
-    login_username = models.CharField(max_length=32)
-    login_password = models.CharField(max_length=128)
+    login_username = models.CharField(max_length=32, default='')
+    login_password = models.CharField(max_length=128, default='')
 
     class Meta:
         db_table = 'aegis_spider_tasks'
@@ -60,7 +60,7 @@ class MiddleFileModel(BaseSQLModel):
         ('PM', 'Parameter'),
     )
 
-    spider_task_id = models.UUIDField()
+    spider_task_id = models.UUIDField(unique=True)
     url = models.URLField(max_length=256)
     filename = models.CharField(max_length=128, unique=True)
     ext = models.CharField(max_length=8, default='.html')

@@ -10,9 +10,9 @@ from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 import views
 
 urlpatterns = [
-    url(r'upload', views.UploadAPIView.as_view(), name='aegis_upload'),
+    url(r'upload$', views.UploadAPIView.as_view(), name='aegis_upload'),
     url(r'(?P<username>.*?)/payment$', views.IsPaymentUser.as_view(), name='aegis_payment'),
-    url(r'spider-task$', views.SpiderTasksAPIView.as_view(), name='aegis_task_create'),
+    url(r'spider-task/(?P<action>.*?)$', views.SpiderTasksAPIView.as_view(), name='aegis_spider_task'),
 ]
 
 
