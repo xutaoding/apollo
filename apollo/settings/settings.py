@@ -199,7 +199,7 @@ REST_FRAMEWORK = {
 
 # `rest_framework_jwt` settings start
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=600),  # expired time
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(minutes=30),  # expired time
 
     # 每次请求过来时如何验证用户(`rest_framework` or `rest_framework_jwt` 找到源代码)
     'JWT_AUTH_HEADER_PREFIX': 'JWT-MSC',  # request header prefix
@@ -234,8 +234,8 @@ CORS_ALLOW_HEADERS = (
 # End `django-cors-headers` middleware Settings
 
 # HTML Web Path Settings Start
-HTML_FILE_PATH = '/data/aegis_html'
-if not os.path.exists(HTML_FILE_PATH):
-    os.makedirs(HTML_FILE_PATH)
+FILE_PATH = '/data/aegis_files/'
+if not os.path.exists(FILE_PATH):
+    os.makedirs(FILE_PATH)
 # HTML Web Path Settings End
 
